@@ -1,2 +1,1 @@
-# blackbox
-make blackbox
+# practice linux
