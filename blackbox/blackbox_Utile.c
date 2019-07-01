@@ -12,20 +12,6 @@
 
 //#define DEBUG
 
-void get_time(char* buf);
-double cmp_time(char*, char*);
-void make_directory(char *dir_name);
-
-int main(int argc, char *argv[]){
-   char time1[] = "20180521_12";
-   char time2[] = "20170923_23";
-
-   // get_time(dir_name);
-    cmp_time(time1,time2);
-
-    return 0;    
-}
-
 // 현재 시간을 buf에 저장
 void get_time(char* buf){
     time_t cur_time;
@@ -122,3 +108,72 @@ void make_directory(char *dir_name){
         printf("directory alreay exists!\n");
     }
 }
+
+// 디바이스 연결 상태 확인
+void chkDevide() {}
+
+// 디렉토리 존재 여부 확인
+void chkDirectory(char* dir_name) {}
+
+// 디스크 용량 확인
+int chkDiskUsage(char *device_name)
+
+// 디렉토리, 하위 파일 삭제
+void rmDirectory() {}
+
+// 디렉토리 내 파일 리스트 확인
+int getDiretoryLIst(char* base_path, struct  dirent **namelist;) {
+	int     count;
+	int     idx;
+
+	
+	if ((count = scandir(base_path, &namelist, NULL, alphasort)) == -1) {
+		fprintf(stderr, "%s Directory Scan Error: %s\n", argv[1], strerror(errno));
+		return 1;
+	}
+
+	for (idx = 0; idx < count; idx++) {
+		printf("%s\n", namelist[idx]->d_name);
+	}
+
+	// 건별 데이터 메모리 해제
+	//for (idx = 0; idx < count; idx++) {
+	//	free(namelist[idx]);
+	//}
+
+	//// namelist에 대한 메모리 해제
+	//free(namelist);
+
+	return count;
+}
+
+// 현재 사용 가능 용량 확인
+long GetAvailableSpace(const char* path)
+{
+	struct statvfs stat;
+
+	if (statvfs(path, &stat) != 0) {
+		// error happens, just quits here
+		return -1;
+	}
+
+	// the available size is f_bsize * f_bavail
+	return stat.f_bsize * stat.f_bavail;
+}
+// blackbox 녹화
+void recVideo() {}
+
+int main(int argc, char *argv[]){
+	char base_path = "/home/song/";
+	struct dirent **dir_list;
+	cnt = getDiretoryLIst(base_path, dir_list);
+	
+	for (int idx = 0; idx < cnt; idx++) {
+		free(namelist[idx]);
+	}
+
+	free(dir_list);
+
+    return 0;    
+}
+
