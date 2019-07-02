@@ -8,17 +8,18 @@ img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 img_gray = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2BGR)
 
 hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-lower_blue = (0, 0, 0)
-upper_blue = (30, 255,255)
-img_mask = cv2.inRange(hsv, lower_blue, upper_blue)
+lower_red = (0,70, 50)
+upper_red = (20, 255,255)
 
+img_mask1 = cv2.inRange(hsv, lower_red, upper_red)
+img_mask2 = cv2.inRange(hsv, (160,70,50), (180,255,255))
+
+img_mask = img_mask1 |  img_mask2
 img_result = cv2.bitwise_and(img, img, mask = img_mask)
 
-dst = cv2.add(img_gray, img_result)
-
-cv2.imshow("image", img_gray)
+cv2.imshow('image', img)
+#cv2.imshow("image_gray", img_gray)
 cv2.imshow('img_result', img_result)
-cv2.imshow("dst", dst)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
