@@ -17,8 +17,8 @@ def img_rotate(img):
 	scale = 1.
 	H = img.shape[0]
 	W = img.shape[1]
-	matrix = cv2.getRotationMatrix2D((W/2,H/2), angle, scale)
-	rotated = cv2.warpAffine(img, matrix, (W,H)) 
+	matrix = cv2.getRotationMatrix2D((H/2,W/2), angle, scale)
+	rotated = cv2.warpAffine(img, matrix, (H,W)) 
 	return rotated
 
 def mouse_callback(event, x, y, flags, param):
