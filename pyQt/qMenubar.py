@@ -14,6 +14,10 @@ class MyApp(QMainWindow):
 		exitAction.setStatusTip('Exit application')
 		exitAction.triggered.connect(qApp.quit)
 		
+		saveAction = QAction(QIcon('./image/save.png'), 'Save', self) 
+		saveAction.setShortcut('Ctrl+S')
+		saveAction.setStatusTip('Save application')
+		
 		# statucbar 생성
 		self.statusBar()
 		
@@ -22,6 +26,7 @@ class MyApp(QMainWindow):
 		menubar.setNativeMenuBar(False)
 		fileMenu = menubar.addMenu('&File')
 		fileMenu.addAction(exitAction)
+		fileMenu.addAction(saveAction)
 		helpMenu = menubar.addMenu('&Help')
 
 		self.setWindowIcon(QIcon('./image/icon.png'))
