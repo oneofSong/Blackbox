@@ -9,8 +9,6 @@
 #include <sys/statvfs.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#include <direct.h>
-
 
 #define __USE_XOPEN  // strptime을 사용하기 위해 추가
 #include <time.h>
@@ -147,6 +145,49 @@ int get_DiretoryLIst(const char* base_path, struct  dirent ***namelist) {
 	return count;
 }
 
+// directory 및 하위 file 삭제
+int rmdirs(const char *path, int is_error_stop) {
+	DIR * dir_ptr = NULL;
+	struct dirent *file = NULL;
+	struct stat buf;
+	char filename[1024];
+	
+	// directory를 oepndir로 읽음
+	if ((dir_ptr = opendir(path)) == NULL) {
+		return unlink(path);
+	}
+	
+	while ((file = readdir(dir_ptr)) != NULL) {
+		
+		if (file->d_name[0] == '.') {
+			continue;
+		}
+		sprintf(filename, "%s/%s", path, file->d_name);
+		
+
+		if (lstat(filename, &buf) == -1) {
+			continue;
+		}
+
+		//검색된 파일 이름이 directory 일 때 rmdirs를 재귀로 부름
+		if (S_ISDIR(buf.st_mode)) {
+			if (rmdirs(filename, is_error_stop) == -1 && is_error_stop) {
+				return -1;
+			}
+		}
+		else if(S_ISREG(buf.st_mode) || S_ISLNK(buf.st_mode)){
+			if (unlink(filename) == -1 && is_error_stop)
+				return -1;
+			
+		}
+	}
+	printf("디렉토리 하위 파일 삭제 완료\n");
+
+	closedir(dir_ptr);
+
+	return rmdir(path);
+}
+
 // 디렉토리, 하위 파일 삭제
 int rm_directory() {
 	int cnt;
@@ -157,7 +198,7 @@ int rm_directory() {
 		perror("get_Directory error");
 		return -1;
 	}
-		
+
 	// 오래된 디렉토리 찾기
 	for (int i = 0; i < cnt; i++) {
 		if (dir_list[i]->d_name[0] != '.') {
@@ -165,13 +206,19 @@ int rm_directory() {
 			break;
 		}
 	}
-	
+
 	// 디렉토리 삭제
-	if (rmdir == -1) {
-		perror("rmdir error");
+	if (rmdirs(dir_name, 1) == -1) {
+		//dir_list 데이터 메모리 해제
+		for (int i = 0; i < cnt; i++) {
+			free(dir_list[i]);
+		}
+		free(dir_list);
+
+		perror("rmdirs error");
 		return -1;
 	}
-		
+
 	//dir_list 데이터 메모리 해제
 	for (int i = 0; i < cnt; i++) {
 		free(dir_list[i]);
@@ -180,24 +227,17 @@ int rm_directory() {
 
 	return 0;
 }
-
-int rmdirs(const)
-
 // 현재 사용 가능 용량 확인
 float get_AvailableSpace(const char* path)
 {
 	struct statvfs stat;
-	long totalSize, availSize;
 
+	// error happens, just quits here
 	if (statvfs(path, &stat) != 0) {
-		// error happens, just quits here
 		return -1;
 	}
-	// the available size is f_bsize * f_bavail
-	availSize = stat.f_bsize * stat.f_bavail;
-	totalSize = stat.f_bsize * stat.f_blocks;
 
-	return (float)availSize / (float)totalSize;
+	return (float)stat.f_bavail / (float) stat.f_blocks;
 }
 
 //// blackbox 녹화
@@ -209,10 +249,10 @@ float get_AvailableSpace(const char* path)
 
 int main(int argc, char *argv[]){
 	
-	rm_directory();
-	
-	
+	int i = rm_directory();
 
+	printf("%d \n", i);
+	
     return 0;    
 }
 
