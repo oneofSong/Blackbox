@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <string.h>
-#include <sys/time.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <errno.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/statvfs.h>
+#include <sys/types.h>
+#include <sys/time.h>
 
 #define __USE_XOPEN  // strptime을 사용하기 위해 추가
 #include <time.h>
@@ -109,34 +112,33 @@ void make_directory(char *dir_name){
     }
 }
 
-// 디바이스 연결 상태 확인
-void chkDevide() {}
-
-// 디렉토리 존재 여부 확인
-void chkDirectory(char* dir_name) {}
-
-// 디스크 용량 확인
-int chkDiskUsage(char *device_name)
-
-// 디렉토리, 하위 파일 삭제
-void rmDirectory() {}
+//// 디바이스 연결 상태 확인
+//void chkDevide() {}
+//
+//// 디렉토리 존재 여부 확인
+//void chkDirectory(char* dir_name) {}
+//
+//// 디스크 용량 확인
+//int chkDiskUsage(char *device_name)
+//
+//// 디렉토리, 하위 파일 삭제
+//void rmDirectory() {}
 
 // 디렉토리 내 파일 리스트 확인
-int getDiretoryLIst(char* base_path, struct  dirent **namelist;) {
+int getDiretoryLIst(char* base_path, struct  dirent ***namelist) {
 	int     count;
 	int     idx;
-
-	
-	if ((count = scandir(base_path, &namelist, NULL, alphasort)) == -1) {
-		fprintf(stderr, "%s Directory Scan Error: %s\n", argv[1], strerror(errno));
+		
+	if ((count = scandir(base_path, namelist, NULL, alphasort)) == -1) {
+		fprintf(stderr, "%s Directory Scan Error: %s\n", base_path, strerror(errno));
 		return 1;
 	}
 
 	for (idx = 0; idx < count; idx++) {
-		printf("%s\n", namelist[idx]->d_name);
+		printf("%s\n", (*namelist)[idx]->d_name);
 	}
 
-	// 건별 데이터 메모리 해제
+	////건별 데이터 메모리 해제
 	//for (idx = 0; idx < count; idx++) {
 	//	free(namelist[idx]);
 	//}
@@ -160,19 +162,26 @@ long GetAvailableSpace(const char* path)
 	// the available size is f_bsize * f_bavail
 	return stat.f_bsize * stat.f_bavail;
 }
-// blackbox 녹화
-void recVideo() {}
+
+//// blackbox 녹화
+//void recVideo() {}
 
 int main(int argc, char *argv[]){
-	char base_path = "/home/song/";
+	char base_path[] = "/home/song/";
 	struct dirent **dir_list;
-	cnt = getDiretoryLIst(base_path, dir_list);
+	int cnt;
+	long avail;
 	
-	for (int idx = 0; idx < cnt; idx++) {
-		free(namelist[idx]);
+	cnt= getDiretoryLIst(base_path, &dir_list);
+	
+	//건별 데이터 메모리 해제
+	for (int i = 0; i < cnt; i++) {
+		free(dir_list[i]);
 	}
-
 	free(dir_list);
+	
+	avail = GetAvailableSpace(base_path);
+	printf("recent avail disk size : %ld\n",avail);
 
     return 0;    
 }
