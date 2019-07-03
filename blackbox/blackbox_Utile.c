@@ -9,6 +9,8 @@
 #include <sys/statvfs.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include <direct.h>
+
 
 #define __USE_XOPEN  // strptime을 사용하기 위해 추가
 #include <time.h>
@@ -16,21 +18,26 @@
 //#define DEBUG
 
 // 현재 시간을 buf에 저장
-void get_time(char* buf){
+struct tm get_time(char* buf, char type){
     time_t cur_time;
     struct tm *tm_ptr;
     
     cur_time = time(NULL);
     tm_ptr = localtime(&cur_time);
 
-    // sprintf(buf, "%d%02d%02d_%02d",tm_ptr->tm_year+1900,tm_ptr->tm_mon+1,tm_ptr->tm_mday,tm_ptr->tm_hour);
-    strftime(buf, 12, "%4Y%2m%2d_%l", tm_ptr);
+	if (type == 'D' || type == 'd')
+		// sprintf(buf, "%d%02d%02d_%02d",tm_ptr->tm_year+1900,tm_ptr->tm_mon+1,tm_ptr->tm_mday,tm_ptr->tm_hour);
+		strftime(buf, 12, "%4Y%2m%2d_%H", tm_ptr);
+	else if (type == 'F' || type == 'f')
+		strftime(buf, 16, "%4Y%2m%2d_%H%M%S", tm_ptr);
+	else
+		buf[0] = '\0';
+
+	return *tm_ptr;
 }
 
 // time1, time2의 시간의 차이를 반환
-// time 1이 클때 양수
-// time 2가 클 때 음수 
-// 같을 때는 0
+// time 1이 클때 양수, time 2가 클 때 음수 , 같을 때는 0
 double cmp_time(char* time1, char* time2){
     struct tm* tmp[2];
     time_t t_fst, t_snd;
@@ -78,32 +85,35 @@ double cmp_time(char* time1, char* time2){
 }
 
 // /home/user_name/black 하위에 디렉토리 생성
-void make_directory(char *dir_name){
-    char path[50] = "/";
+void make_directory(const char *dir_name){
+    char path[50] = "";
     int ret;
-    
     struct passwd *user_pw;
-    user_pw = getpwuid(getuid());
-
-    strcat(path, user_pw->pw_dir);
+    
+	user_pw = getpwuid(getuid());
+	strcat(path, user_pw->pw_dir);
     strcat(path, "/blackbox/");   
 
 
     if ( 0 != access(path, R_OK)){
+
+#ifdef DEBUG
         printf("blackbox 디렉토리 생성\n");
         printf("%s\n", path);
-
+#endif
         if((ret=mkdir(path, 0755) == -1)){
             perror("mkdir");
         }
-
     }
 
+	// 디렉토리 경로 저장
     strcat(path, dir_name);
+
     if ( 0 != access(path, R_OK)){
+#ifdef DEBUG
         printf("시간  디렉토리 생성\n");
         printf("%s\n", path);
-
+#endif 
         if((ret=mkdir(path, 0755) == -1)){
             perror("mkdir");
         }
@@ -112,31 +122,19 @@ void make_directory(char *dir_name){
     }
 }
 
-//// 디바이스 연결 상태 확인
-//void chkDevide() {}
-//
-//// 디렉토리 존재 여부 확인
-//void chkDirectory(char* dir_name) {}
-//
-//// 디스크 용량 확인
-//int chkDiskUsage(char *device_name)
-//
-//// 디렉토리, 하위 파일 삭제
-//void rmDirectory() {}
-
-// 디렉토리 내 파일 리스트 확인
-int getDiretoryLIst(char* base_path, struct  dirent ***namelist) {
+// 디렉토리 내 파일 리스트 반환
+int get_DiretoryLIst(const char* base_path, struct  dirent ***namelist) {
 	int     count;
 	int     idx;
 		
 	if ((count = scandir(base_path, namelist, NULL, alphasort)) == -1) {
 		fprintf(stderr, "%s Directory Scan Error: %s\n", base_path, strerror(errno));
-		return 1;
+		return -1;
 	}
 
-	for (idx = 0; idx < count; idx++) {
-		printf("%s\n", (*namelist)[idx]->d_name);
-	}
+	//for (idx = 0; idx < count; idx++) {
+	//	printf("%s\n", (*namelist)[idx]->d_name);
+	//}
 
 	////건별 데이터 메모리 해제
 	//for (idx = 0; idx < count; idx++) {
@@ -149,39 +147,71 @@ int getDiretoryLIst(char* base_path, struct  dirent ***namelist) {
 	return count;
 }
 
+// 디렉토리, 하위 파일 삭제
+int rm_directory() {
+	int cnt;
+	struct dirent **dir_list;
+	char dir_name[64] = "/home/songs/blackbox/";
+
+	if ((cnt = get_DiretoryLIst(dir_name, &dir_list)) == -1) {
+		perror("get_Directory error");
+		return -1;
+	}
+		
+	// 오래된 디렉토리 찾기
+	for (int i = 0; i < cnt; i++) {
+		if (dir_list[i]->d_name[0] != '.') {
+			strcat(dir_name, dir_list[i]->d_name);
+			break;
+		}
+	}
+	
+	// 디렉토리 삭제
+	if (rmdir == -1) {
+		perror("rmdir error");
+		return -1;
+	}
+		
+	//dir_list 데이터 메모리 해제
+	for (int i = 0; i < cnt; i++) {
+		free(dir_list[i]);
+	}
+	free(dir_list);
+
+	return 0;
+}
+
+int rmdirs(const)
+
 // 현재 사용 가능 용량 확인
-long GetAvailableSpace(const char* path)
+float get_AvailableSpace(const char* path)
 {
 	struct statvfs stat;
+	long totalSize, availSize;
 
 	if (statvfs(path, &stat) != 0) {
 		// error happens, just quits here
 		return -1;
 	}
-
 	// the available size is f_bsize * f_bavail
-	return stat.f_bsize * stat.f_bavail;
+	availSize = stat.f_bsize * stat.f_bavail;
+	totalSize = stat.f_bsize * stat.f_blocks;
+
+	return (float)availSize / (float)totalSize;
 }
 
 //// blackbox 녹화
-//void recVideo() {}
+//void rec_Video() {}
+
+//// 디바이스 연결 상태 확인
+//void chk_devide() {}
+//
 
 int main(int argc, char *argv[]){
-	char base_path[] = "/home/song/";
-	struct dirent **dir_list;
-	int cnt;
-	long avail;
 	
-	cnt= getDiretoryLIst(base_path, &dir_list);
+	rm_directory();
 	
-	//건별 데이터 메모리 해제
-	for (int i = 0; i < cnt; i++) {
-		free(dir_list[i]);
-	}
-	free(dir_list);
 	
-	avail = GetAvailableSpace(base_path);
-	printf("recent avail disk size : %ld\n",avail);
 
     return 0;    
 }
