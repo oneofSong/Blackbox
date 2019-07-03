@@ -1,7 +1,8 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget,QVBoxLayout,QLineEdit,QCheckBox
+from PyQt5.QtWidgets import QApplication, QWidget,QVBoxLayout,\
+QLineEdit,QCheckBox
 from PyQt5.QtCore import Qt
-
+from PyQt5 import QtGui
 
 class MyApp(QWidget):
 
@@ -17,18 +18,20 @@ class MyApp(QWidget):
         self.display.setReadOnly(True)
         self.display.setAlignment(Qt.AlignCenter)
         self.display.setMaxLength(15)
+
+        font = self.display.font()
+        font = QtGui.QFont('Sans Serif', font.pointSize()+8)
+        self.display.setFont(font) 
+ 
 	
 
         self.cb1 = QCheckBox('짜장', self)
-        self.cb1.move(20, 20)
         self.cb1.stateChanged.connect(self.checkedBox)
 
         self.cb2 = QCheckBox('짬뽕', self)
-        self.cb2.move(20, 20)
         self.cb2.stateChanged.connect(self.checkedBox)
 
         self.cb3 = QCheckBox('탕수육', self)
-        self.cb3.move(20, 20)
         self.cb3.stateChanged.connect(self.checkedBox)
 
         vbox = QVBoxLayout()
