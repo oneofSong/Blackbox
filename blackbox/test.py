@@ -23,8 +23,9 @@ get_time.restype = TimeStruct
 buf = create_string_buffer(b'\000' * 64)
 buf_ptr = pointer(buf)
 file_type = c_char(b'd')
-#print("buf type : ", buf_ptr)
 
 tm = get_time(buf_ptr, file_type)
 print(tm.tm_hour , tm.tm_min , tm.tm_sec)
 print(buf_ptr.contents[:11])
+
+mkdir(buf_ptr)
