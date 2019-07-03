@@ -181,8 +181,11 @@ int rmdirs(const char *path, int is_error_stop) {
 			
 		}
 	}
-	printf("디렉토리 하위 파일 삭제 완료\n");
 
+#ifdef DEBUG
+	printf("디렉토리 하위 파일 삭제 완료\n");
+#endif // DEBUG
+	
 	closedir(dir_ptr);
 
 	return rmdir(path);
@@ -247,12 +250,12 @@ float get_AvailableSpace(const char* path)
 //void chk_devide() {}
 //
 
-int main(int argc, char *argv[]){
-	
-	int i = rm_directory();
 
-	printf("%d \n", i);
-	
-    return 0;    
-}
+//test main
+//int main(int argc, char *argv[]){
+//	
+//
+//	
+//    return 0;    
+//}
 
