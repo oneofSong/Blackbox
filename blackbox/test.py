@@ -5,6 +5,7 @@ Util = CDLL('./blackbox_Util.so')
 
 get_time = Util.get_time
 mkdir = Util.make_directory
+get_AvailableSpace = Util.get_AvailableSpace
 
 class TimeStruct(Structure):
     _fields_ = [\
@@ -20,12 +21,18 @@ class TimeStruct(Structure):
     ]
 
 get_time.restype = TimeStruct
-buf = create_string_buffer(b'\000' * 64)
-buf_ptr = pointer(buf)
-file_type = c_char(b'd')
+buf = create_string_buffer(b'\000' * 32)
+#buf_ptr = pointer(buf)
+file_type = c_char(b'f')
 
-tm = get_time(buf_ptr, file_type)
+tm = get_time(buf, file_type)
 print(tm.tm_hour , tm.tm_min , tm.tm_sec)
-print(buf_ptr.contents[:11])
+print(buf[:15])
 
-mkdir(buf_ptr)
+# free disk size
+base_path = c_char_p(b'/home/song/blackbox')
+get_AvailableSpace.restype = c_float
+avail_Size = get_AvailableSpace(base_path)
+print(avail_Size)
+
+#mkdir(buf_ptr)
