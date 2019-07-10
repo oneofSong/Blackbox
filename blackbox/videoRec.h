@@ -4,10 +4,9 @@
 
 #include <opencv2/opencv.hpp>
 #include <iostream>
-#include <ctime>
 #include <string>
 #include <sstream>
-
+#include <ctime>
 
 using namespace cv;
 using namespace std;
@@ -34,9 +33,8 @@ public:
 	double fps;
 	int time;
 
-	CvVideoCapture();
 	CvVideoCapture(int width, int height, double fps);
-	string get_tegra_pipline(int width, int height, double fps);
+	void get_tegra_pipline(int width, int height, double fps);
 	int recordVideo(string path,int rec_time);
 	int videoisOpened();
 };
