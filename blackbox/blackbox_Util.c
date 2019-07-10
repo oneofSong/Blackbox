@@ -13,7 +13,6 @@
 #define __USE_XOPEN  // strptime을 사용하기 위해 추가
 #include <time.h>
 
-//#define DEBUG
 
 // 현재 시간을 buf에 저장
 struct tm get_time(char* buf, char type){
@@ -28,8 +27,7 @@ struct tm get_time(char* buf, char type){
 		strftime(buf, 12, "%4Y%2m%2d_%H", tm_ptr);
 	else if (type == 'F' || type == 'f')
 		strftime(buf, 16, "%4Y%2m%2d_%H%M%S", tm_ptr);
-	else
-		buf[0] = '\0';
+
 
 	return *tm_ptr;
 }
@@ -83,7 +81,7 @@ double cmp_time(char* time1, char* time2){
 }
 
 // /home/user_name/black 하위에 디렉토리 생성
-void make_directory(const char *dir_name){
+int make_directory(const char *dir_name){
     char path[50] = "";
     int ret;
     struct passwd *user_pw;
@@ -101,6 +99,7 @@ void make_directory(const char *dir_name){
 #endif
         if((ret=mkdir(path, 0755) == -1)){
             perror("mkdir");
+			return -1;
         }
     }
 
@@ -114,10 +113,13 @@ void make_directory(const char *dir_name){
 #endif 
         if((ret=mkdir(path, 0755) == -1)){
             perror("mkdir");
+			return -1;
         }
     } else{
         printf("directory alreay exists!\n");
+		return 0;
     }
+
 }
 
 // 디렉토리 내 파일 리스트 반환
@@ -127,6 +129,7 @@ int get_DiretoryLIst(const char* base_path, struct  dirent ***namelist) {
 		
 	if ((count = scandir(base_path, namelist, NULL, alphasort)) == -1) {
 		fprintf(stderr, "%s Directory Scan Error: %s\n", base_path, strerror(errno));
+		printf("%s\n", base_path);
 		return -1;
 	}
 
@@ -192,11 +195,11 @@ int rmdirs(const char *path, int is_error_stop) {
 }
 
 // 디렉토리, 하위 파일 삭제
-int rm_directory() {
+int rm_directory(char *base_path) {
 	int cnt;
 	struct dirent **dir_list;
-	char dir_name[64] = "/home/songs/blackbox/";
-
+	char dir_name[64];
+	strcpy(dir_name, base_path);
 	if ((cnt = get_DiretoryLIst(dir_name, &dir_list)) == -1) {
 		perror("get_Directory error");
 		return -1;
@@ -230,6 +233,7 @@ int rm_directory() {
 
 	return 0;
 }
+
 // 현재 사용 가능 용량 확인
 float get_AvailableSpace(const char* path)
 {
@@ -237,6 +241,7 @@ float get_AvailableSpace(const char* path)
 
 	// error happens, just quits here
 	if (statvfs(path, &stat) != 0) {
+		perror("statvfs error");
 		return -1;
 	}
 
@@ -249,13 +254,4 @@ float get_AvailableSpace(const char* path)
 //// 디바이스 연결 상태 확인
 //void chk_devide() {}
 //
-
-
-//test main
-//int main(int argc, char *argv[]){
-//	
-//
-//	
-//    return 0;    
-//}
 
