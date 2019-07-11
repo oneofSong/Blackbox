@@ -22,7 +22,7 @@ void CvVideoCapture::get_tegra_pipline(int width, int height, double fps) {
 int CvVideoCapture::recordVideo(string path, int rec_time) {
 	recordFlag = true;
 
-	int end_time;
+//	int end_time;
 	writer.open("appsrc ! autovideoconvert ! omxh265enc ! matroskamux ! filesink location="+path, VideoWriter::fourcc('X', 'V', 'I', 'D'), fps, size, true);
 
 	if (!writer.isOpened())
@@ -31,9 +31,9 @@ int CvVideoCapture::recordVideo(string path, int rec_time) {
 		return -1;
 	}
 
-	end_time = std::time(0) + rec_time * 60 ;
+//	end_time = std::time(0) + rec_time * 60 ;
 
-	cout << end_time << endl;
+//	cout << end_time << endl;
 
 	while (recordFlag)
 	{
@@ -49,7 +49,7 @@ int CvVideoCapture::recordVideo(string path, int rec_time) {
 		imshow(path, img_color);
 		waitKey(25);
 
-		if (end_time < std::time(0))
+		if (std::time(0)%60 == 59)
 			break;
 	}
 	destroyAllWindows();

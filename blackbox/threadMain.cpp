@@ -32,7 +32,7 @@ int main() {
 	pthread_t p_thread[2];
 	int thr_id[2];
 	int flag = 0;
-	int start_time, end_time = 0;
+	time_t start_time, end_time = 0;
 	
 	
 	// device check 
@@ -52,13 +52,17 @@ int main() {
 
 	while (1) {
 		//disk 용량확인
-		if ((disk_size = get_AvailableSpace(base_path)) < 0.4) {
-			printf("main size : %f\n", disk_size);
+		start_time = time(0);
+		if ((disk_size = get_AvailableSpace(base_path)) < 0.5) {
 			rm_directory(base_path);
-		}else printf("main size : %f\n", disk_size);
+		       	printf("cur_time : %s main size : %f \n",ctime(&start_time), disk_size);
+		}else{
+		       	printf("cur_time : %s main size : %f \n",ctime(&start_time), disk_size);
+			ctime(&start_time);
+		}
 
 		// video 녹화
-		if (end_time < time(0)) {
+		if (time(0) % 60 == 0) {
 
 			if (flag == 0) {
 				start_time = time(0);
@@ -106,7 +110,7 @@ void *rec_Video(void *data) {
 
 #ifdef DEBUG
 	int t_id = pthread_self();
-	printf("thread: %u create, start_time :  \n", t_id);
+	printf("thread: %u create, start_time : %ld \n", t_id, time(0));
 #endif
 
 
