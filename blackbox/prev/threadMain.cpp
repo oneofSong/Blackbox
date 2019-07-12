@@ -1,29 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <pwd.h>
-#include <errno.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <sys/statvfs.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <pthread.h>
-#include <time.h>
-#include <sys/time.h>
-
 #include "videoRec.h"
 
-#define DEBUG
+//#define DEBUG
 
 char base_path[] = "/home/nvidia/blackbox/";
 
-extern struct tm get_time(char*, char type);
-extern int make_directory(const char*);
-extern int get_DirectoryList(const char*, struct dirent ***);
-extern int rm_directory(char *base_path);
-extern float get_AvailableSpace(const char*);
 
 void *rec_Video(void *data);
 
